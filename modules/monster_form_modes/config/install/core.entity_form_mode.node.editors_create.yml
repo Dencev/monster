@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.editors_create
+label: 'Editors create'
+targetEntityType: node
+cache: true
