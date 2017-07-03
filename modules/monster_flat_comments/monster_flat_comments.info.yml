@@ -1,0 +1,5 @@
+name: Monster flat comments
+type: module
+description: "Flat comments."
+core: 8.x
+package: Monster

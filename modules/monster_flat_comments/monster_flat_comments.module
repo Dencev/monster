@@ -1,0 +1,99 @@
+<?php
+
+/**
+ * @file
+ * Contains monster_flat_comments module file.
+ */
+
+use Drupal\comment\CommentInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function monster_flat_comments_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.monster_flat_comments':
+      $output = '';
+      $output .= '<h3>' . t('Source') . '</h3>';
+      $output .= '<a href="https://github.com/agaric/flat_comments/blob/master/flat_comments.module" target="_blank">' . t('Flat comments original source.') . '</a>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function monster_flat_comments_form_field_config_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  /** @var Drupal\field\Entity\FieldConfig $field */
+  $field = $form_state->getFormObject()->getEntity();
+
+  // This only applies for comment fields.
+  if ($field->getType() != 'comment') {
+    return;
+  }
+  $form['actions']['submit']['#submit'][] = 'monster_flat_comments_save';
+
+  // Add note about flat_comments to comment display description.
+  $form['settings']['default_mode']['#description'] .= t(' <strong>flat_comments enabled:</strong> Leave this box unchecked to force replies to be to the main post instead of other comments.');
+
+  // Add option to remove reply link from comments.
+  $form['settings']['remove_reply_link'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Do not show a reply link on comments'),
+    '#default_value' => $field->getThirdPartySetting('flat_comments', 'remove_reply_link', FALSE),
+  ];
+}
+
+function monster_flat_comments_save(array &$form, FormStateInterface $form_state) {
+  /** @var Drupal\field\Entity\FieldConfig $field */
+  $field = $form_state->getFormObject()->getEntity();
+  $values = $form_state->getValues();
+
+  $field->setThirdPartySetting('flat_comments', 'remove_reply_link', $values['settings']['remove_reply_link']);
+  $field->save();
+}
+
+/**
+ * Implementation of hook_comment_presave().
+ */
+function monster_flat_comments_comment_presave(CommentInterface $comment) {
+  $entity = \Drupal::entityManager()
+    ->getStorage($comment->getCommentedEntityTypeId())
+    ->load($comment->getCommentedEntityId());
+
+  $field_definition = \Drupal::entityManager()
+    ->getFieldDefinitions($entity->getEntityTypeId(), $entity->bundle());
+  $field_definition = $field_definition[$comment->getFieldName()];
+
+  // Only affect new comments and comments set to be displayed flat.
+  if (!$comment->id() && $field_definition->getSetting('default_mode') === 0) {
+    // Set parent id to NULL to prevent threads.
+    $comment->get('pid')->setValue(NULL);
+  }
+}
+
+/**
+ * Implements hook_comments_links_alter().
+ */
+function monster_flat_comments_comment_links_alter(array &$links, CommentInterface $entity, array &$context) {
+
+  // If there is not a "reply" link, no need to continue.
+  if (!isset($links['comment']['#links']['comment-reply'])) {
+    return;
+  }
+
+  $comment = $entity;
+  $entity = \Drupal::entityManager()
+    ->getStorage($comment->getCommentedEntityTypeId())
+    ->load($comment->getCommentedEntityId());
+
+  $field_definition = \Drupal::entityManager()
+    ->getFieldDefinitions($entity->getEntityTypeId(), $entity->bundle());
+  $field_definition = $field_definition[$comment->getFieldName()];
+
+  if($field_definition->getThirdPartySetting('flat_comments', 'remove_reply_link', FALSE)) {
+    unset($links['comment']['#links']['comment-reply']);
+  }
+}
