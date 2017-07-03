@@ -1,0 +1,5 @@
+name: Monster form modes
+type: module
+description: "Form modes."
+core: 8.x
+package: Monster

@@ -1,0 +1,59 @@
+<?php
+
+/**
+ * @file
+ * Monster module file.
+ */
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function monster_form_modes_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.monster_form_modes':
+      $output = '';
+      $output .= '<h3>' . t('Source') . '</h3>';
+      $output .= '<a href="https://www.webomelette.com/render-custom-entity-form-modes-programatically-drupal-8" target="_blank">' . t('Render custom entity form modes programatically in Drupal 8') . '</a>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_entity_type_build().
+ */
+function monster_form_modes_entity_type_build(array &$entity_types) {
+  $entity_types['node']->setFormClass('create_editors', 'Drupal\node\NodeForm');
+}
+
+/**
+ * Implements hook_entity_type_alter().
+ */
+function monster_form_modes_entity_type_alter(array &$entity_types) {
+  // We get all form modes, for all entities, and loop through them.
+  $form_modes = \Drupal::service('entity_display.repository')
+    ->getAllFormModes();
+  foreach ($form_modes as $entity_type => $display_modes) {
+    if ($entity_type !== 'node') {
+      // We are only interested in adding a handler to the Node entity.
+      continue;
+    }
+
+    $node_type = $entity_types[$entity_type];
+    foreach ($display_modes as $machine_name => $form_display) {
+      if ($machine_name !== 'editors_create') {
+        // We are only interested in adding this form mode to the definition.
+        continue;
+      }
+      // We get the default handler class. It will be enough for us.
+      $default_handler_class = $node_type->getHandlerClasses()['form']['default'];
+      // We set the form class, keyed by the machine name of our custom form
+      // mode.
+      $node_type->setFormClass($machine_name, $default_handler_class);
+    }
+  }
+
+  // Get form with:
+  // $form = \Drupal::service('entity.form_builder')
+  // ->getForm($entity, 'editors_create').
+}
