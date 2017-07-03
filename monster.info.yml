@@ -1,0 +1,5 @@
+name: Monster
+type: module
+description: "Collection of code found around and more."
+core: 8.x
+package: Monster
