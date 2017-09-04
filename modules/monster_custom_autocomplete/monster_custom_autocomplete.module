@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * @file
+ * Contains monster_custom_autocomplete module file.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function monster_custom_autocomplete_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.monster_custom_autocomplete':
+      $output = '';
+      $output .= '<h3>' . t('Source') . '</h3>';
+      $output .= '<a href="https://www.chapterthree.com/blog/how-alter-entity-autocomplete-results-drupal-8" target="_blank">' . t('How to Alter Entity Autocomplete Results in Drupal 8') . '</a>';
+      return $output;
+  }
+}

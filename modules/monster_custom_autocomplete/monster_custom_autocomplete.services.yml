@@ -1,0 +1,10 @@
+services:
+
+  monster_custom_autocomplete.route_subscriber:
+    class: Drupal\monster_custom_autocomplete\Routing\AutocompleteRouteSubscriber
+    tags:
+      - { name: event_subscriber }
+
+  monster_custom_autocomplete.autocomplete_matcher:
+    class: Drupal\monster_custom_autocomplete\EntityAutocompleteMatcher
+    arguments: ['@plugin.manager.entity_reference_selection']
