@@ -1,0 +1,27 @@
+langcode: en
+status: true
+dependencies:
+  config:
+  - field.field.node.monster_linkit_example.body
+  - node.type.monster_linkit_example
+  module:
+  - text
+  - user
+id: node.monster_linkit_example.default
+targetEntityType: node
+bundle: monster_linkit_example
+mode: default
+content:
+  body:
+    label: hidden
+    type: text_default
+    weight: 101
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  links:
+    weight: 100
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+hidden: {  }

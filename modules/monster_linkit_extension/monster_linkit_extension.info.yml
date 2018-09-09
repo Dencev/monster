@@ -1,0 +1,8 @@
+name: Monster linkit extension
+type: module
+description: "Linkit extension for particular entity type @see https://www.previousnext.com.au/blog/creating-custom-linkit-matcher-plugin?utm_source=drupal-newsletter&utm_medium=email&utm_campaign=drupal-newsletter-20180222"
+core: 8.x
+package: Monster
+
+dependencies:
+  - linkit:linkit
